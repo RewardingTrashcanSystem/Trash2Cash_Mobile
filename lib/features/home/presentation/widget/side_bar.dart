@@ -5,6 +5,7 @@ import 'package:trash2cash/features/auth/data/model/user_model.dart';
 import 'package:trash2cash/features/auth/presentation/provider/auth_provider.dart';
 
 import 'package:trash2cash/features/auth/presentation/screen/login_screen.dart';
+import 'package:trash2cash/features/home/presentation/screen/about_page.dart';
 import 'package:trash2cash/features/home/presentation/screen/edit_profile_screen.dart';
 
 
@@ -102,9 +103,11 @@ class AppDrawer extends StatelessWidget {
                     color: Colors.green.shade800,
                     onTap: () {
                       Navigator.pop(context);
-                      // TODO: Add about screen
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('About page coming soon!')),
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const AboutPage(),
+                        ),
                       );
                     },
                   ),
