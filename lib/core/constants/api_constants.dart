@@ -36,7 +36,7 @@ class ApiConstants {
     return '$baseUrl/$cleanPath';
   }
   
-  static String getImageFullUrl(String relativePath) {
+static String getImageFullUrl(String relativePath) {
     // Handle null or empty paths
     if (relativePath == null || relativePath.isEmpty) {
       return '';
@@ -47,17 +47,32 @@ class ApiConstants {
       return relativePath;
     }
     
-    // Clean the path and combine with base URL
-    final cleanPath = relativePath.startsWith('/') 
-        ? relativePath.substring(1) 
-        : relativePath;
+    // If the path starts with /, combine it directly
+    if (relativePath.startsWith('/')) {
+      // Remove any trailing slash from baseUrl and combine
+      final cleanBaseUrl = baseUrl.endsWith('/') 
+          ? baseUrl.substring(0, baseUrl.length - 1) 
+          : baseUrl;
+      return '$cleanBaseUrl$relativePath';
+    }
     
-    return '$baseUrl/$cleanPath';
+    // For paths without leading slash
+    return '$baseUrl/$relativePath';
   }
+  
+  static const String transferPoints = '/api/points/transfer/';
+  static const String checkReceiver = '/api/points/check-receiver/';
+  
+  // QR Scan endpoint
+  static const String qrScan = '/api/points/qr-scan/';
+  
+  // History endpoints
+  static const String history = '/api/points/';
+  static const String recentHistory = '/api/points/recent/';
 
   // Timeouts
-  static const Duration connectionTimeout = Duration(seconds: 30);
-  static const Duration receiveTimeout = Duration(seconds: 30);
+  static const Duration connectionTimeout = Duration(seconds: 60);
+  static const Duration receiveTimeout = Duration(seconds: 60);
 
   // Storage Keys
   static const String tokenKey = 'auth_token';

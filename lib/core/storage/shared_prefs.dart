@@ -1,6 +1,6 @@
+// shared_prefs.dart
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trash2cash/core/constants/api_constants.dart';
-
 
 class SharedPrefs {
   static late SharedPreferences _prefs;
@@ -16,6 +16,19 @@ class SharedPrefs {
 
   static String? getToken() {
     return _prefs.getString(ApiConstants.tokenKey);
+  }
+
+  // Add refresh token methods
+  static Future<void> saveRefreshToken(String refreshToken) async {
+    await _prefs.setString('refresh_token', refreshToken);
+  }
+
+  static String? getRefreshToken() {
+    return _prefs.getString('refresh_token');
+  }
+
+  static Future<void> removeRefreshToken() async {
+    await _prefs.remove('refresh_token');
   }
 
   static Future<void> removeToken() async {
@@ -47,6 +60,7 @@ class SharedPrefs {
   // Clear all auth data
   static Future<void> clearAuthData() async {
     await removeToken();
+    await removeRefreshToken();
     await removeUserData();
     await setLoggedIn(false);
   }

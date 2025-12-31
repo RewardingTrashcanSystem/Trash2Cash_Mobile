@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:provider/provider.dart';
+import 'package:trash2cash/features/home/data/model/recycling_data.dart';
+import 'package:trash2cash/features/home/presentation/provider/scan_provider.dart';
+
 
 class QRScannerScreen extends StatefulWidget {
-  final Function(String)? onQRCodeScanned;
-  
-  const QRScannerScreen({super.key, this.onQRCodeScanned});
+  const QRScannerScreen({super.key});
 
   @override
   State<QRScannerScreen> createState() => _QRScannerScreenState();
@@ -13,7 +15,8 @@ class QRScannerScreen extends StatefulWidget {
 class _QRScannerScreenState extends State<QRScannerScreen> {
   MobileScannerController cameraController = MobileScannerController();
   bool _isFlashOn = false;
-  bool _isScanning = false;
+  String? _lastScannedCode;
+  DateTime? _lastScanTime;
 
   @override
   void dispose() {
@@ -23,56 +26,163 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Scan QR Code'),
-        backgroundColor: Colors.green.shade700,
-        actions: [
-          IconButton(
+    final scanProvider = Provider.of<ScanProvider>(context);
+    
+    return PopScope(
+      canPop: true,
+      onPopInvoked: (didPop) {
+        if (didPop) {
+          scanProvider.clearState();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Scan QR Code'),
+          backgroundColor: Colors.green.shade700,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
             onPressed: () {
-              setState(() {
-                _isFlashOn = !_isFlashOn;
-              });
-              cameraController.toggleTorch();
+              scanProvider.clearState();
+              Navigator.pop(context);
             },
-            icon: Icon(
-              _isFlashOn ? Icons.flash_on : Icons.flash_off,
-              color: Colors.white,
-            ),
           ),
-        ],
+          actions: [
+            IconButton(
+              onPressed: () {
+                setState(() {
+                  _isFlashOn = !_isFlashOn;
+                });
+                cameraController.toggleTorch();
+              },
+              icon: Icon(
+                _isFlashOn ? Icons.flash_on : Icons.flash_off,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+        body: Stack(
+          children: [
+            // QR Scanner
+            MobileScanner(
+              controller: cameraController,
+              onDetect: (capture) {
+                _handleQRDetection(capture, scanProvider);
+              },
+            ),
+            
+            // Scanner overlay
+            _buildScannerOverlay(),
+            
+            // Processing indicator
+            if (scanProvider.isProcessing) _buildProcessingIndicator(),
+          ],
+        ),
       ),
-      body: Stack(
-        children: [
-          // QR Scanner
-          MobileScanner(
-            controller: cameraController,
-            onDetect: (capture) {
-              if (_isScanning) return;
+    );
+  }
+
+  void _handleQRDetection(BarcodeCapture capture, ScanProvider scanProvider) {
+    final barcodes = capture.barcodes;
+    if (barcodes.isEmpty) return;
+    
+    final code = barcodes.first.rawValue;
+    if (code == null) return;
+    
+    // Prevent duplicate scans within 3 seconds
+    final now = DateTime.now();
+    if (_lastScannedCode == code && 
+        _lastScanTime != null && 
+        now.difference(_lastScanTime!).inSeconds < 3) {
+      return;
+    }
+    
+    // Update last scan info
+    _lastScannedCode = code;
+    _lastScanTime = now;
+    
+    // Process QR code
+    scanProvider.processQRCode(code).then((result) {
+      if (result['success'] == true && result['recyclingData'] != null) {
+        // Show confirmation dialog
+        _showConfirmationDialog(context, result['recyclingData'], scanProvider);
+      }
+    });
+  }
+
+  void _showConfirmationDialog(BuildContext context, RecyclingData recyclingData, ScanProvider scanProvider) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(Icons.qr_code_scanner, color: Colors.green),
+            const SizedBox(width: 10),
+            Text('${recyclingData.displayName} Detected'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Material: ${recyclingData.emoji} ${recyclingData.displayName}'),
+            const SizedBox(height: 10),
+            Text('Points: ${recyclingData.pointsToAdd}'),
+            const SizedBox(height: 10),
+            Text('Time: ${DateTime.now().toLocal().toString().split('.')[0]}'),
+            const SizedBox(height: 20),
+            const Text(
+              'Do you want to add these points?',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              scanProvider.cancelScan();
+              Navigator.pop(context);
+            },
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
               
-              final barcodes = capture.barcodes;
-              if (barcodes.isNotEmpty) {
-                final code = barcodes.first.rawValue;
-                if (code != null && widget.onQRCodeScanned != null) {
-                  setState(() => _isScanning = true);
-                  widget.onQRCodeScanned!(code);
-                  
-                  // Wait a moment before allowing next scan
-                  Future.delayed(const Duration(seconds: 2), () {
-                    if (mounted) {
-                      setState(() => _isScanning = false);
-                    }
-                  });
-                }
+              final result = await scanProvider.confirmAndSendScan(recyclingData);
+              
+              if (result['success'] == true) {
+                // Show success and go back
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(result['message']),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+                
+                // Delay and go back
+                Future.delayed(const Duration(seconds: 1), () {
+                  if (mounted) {
+                    scanProvider.clearState();
+                    Navigator.pop(context);
+                  }
+                });
+              } else {
+                // Show error
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(result['message']),
+                    backgroundColor: Colors.red,
+                  ),
+                );
               }
             },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+            ),
+            child: const Text('Add Points'),
           ),
-          
-          // Scanner overlay
-          _buildScannerOverlay(),
-          
-          // Scanning indicator
-          if (_isScanning) _buildScanningIndicator(),
         ],
       ),
     );
@@ -84,22 +194,18 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     
     return Column(
       children: [
-        // Top overlay
         Expanded(
           child: Container(color: Colors.black.withOpacity(0.5)),
         ),
         
-        // Middle section with cutout
         SizedBox(
           height: cutoutSize,
           child: Row(
             children: [
-              // Left overlay
               Expanded(
                 child: Container(color: Colors.black.withOpacity(0.5)),
               ),
               
-              // Scanner frame
               Container(
                 width: cutoutSize,
                 height: cutoutSize,
@@ -131,7 +237,6 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                 ),
               ),
               
-              // Right overlay
               Expanded(
                 child: Container(color: Colors.black.withOpacity(0.5)),
               ),
@@ -139,7 +244,6 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
           ),
         ),
         
-        // Bottom overlay with instructions
         Expanded(
           child: Container(
             color: Colors.black.withOpacity(0.8),
@@ -174,7 +278,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     );
   }
 
-  Widget _buildScanningIndicator() {
+  Widget _buildProcessingIndicator() {
     return Container(
       color: Colors.black.withOpacity(0.7),
       child: const Center(

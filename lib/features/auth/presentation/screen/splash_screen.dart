@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:trash2cash/features/auth/presentation/provider/auth_provider.dart';
+import 'package:trash2cash/features/auth/presentation/provider/profile_provider.dart';
+import 'package:trash2cash/core/storage/shared_prefs.dart';
 import 'package:trash2cash/features/home/presentation/screen/home_screen.dart';
 import 'package:trash2cash/features/onboarding/presentation/Screen/onboarding_page.dart';
 
@@ -23,20 +25,39 @@ class _SplashScreenState extends State<SplashScreen> {
     await Future.delayed(const Duration(seconds: 2));
     
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
     
     // Check if user is authenticated
     if (authProvider.isAuthenticated) {
-      // Navigate to home
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => Trash2CashHomeUI()),
-      );
+      try {
+        // Fetch user profile before navigating
+        await profileProvider.fetchProfile();
+        
+        // Navigate to home
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => Trash2CashHomeUI()),
+          );
+        }
+      } catch (e) {
+        // If profile fetch fails, logout and go to onboarding
+        await authProvider.logout();
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => OnbordingPage()),
+          );
+        }
+      }
     } else {
       // Navigate to onboarding
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => OnbordingPage()),
-      );
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => OnbordingPage()),
+        );
+      }
     }
   }
 

@@ -3,29 +3,33 @@ import 'package:flutter/material.dart';
 class InputFormat {
   static Widget firstName({
     required TextEditingController controller,
+    bool isRequired = false,
+    String? Function(String?)? validator,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.only(bottom: 8, left: 4),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8, left: 4),
           child: Text(
-            'First Name *',
-            style: TextStyle(
+            'First Name ${isRequired ? '*' : ''}',
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
               color: Colors.black87,
             ),
           ),
         ),
-        TextField(
+        TextFormField(
           controller: controller,
           decoration: const InputDecoration(
             hintText: 'Enter your first name',
             prefixIcon: Icon(Icons.person),
             border: OutlineInputBorder(),
+            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
           ),
           textInputAction: TextInputAction.next,
+          validator: validator,
         ),
       ],
     );
@@ -33,29 +37,33 @@ class InputFormat {
 
   static Widget lastName({
     required TextEditingController controller,
+    bool isRequired = false,
+    String? Function(String?)? validator,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.only(bottom: 8, left: 4),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8, left: 4),
           child: Text(
-            'Last Name *',
-            style: TextStyle(
+            'Last Name ${isRequired ? '*' : ''}',
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
               color: Colors.black87,
             ),
           ),
         ),
-        TextField(
+        TextFormField(
           controller: controller,
           decoration: const InputDecoration(
             hintText: 'Enter your last name',
             prefixIcon: Icon(Icons.person),
             border: OutlineInputBorder(),
+            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
           ),
           textInputAction: TextInputAction.next,
+          validator: validator,
         ),
       ],
     );
@@ -64,6 +72,7 @@ class InputFormat {
   static Widget email({
     required TextEditingController controller,
     bool isRequired = false,
+    String? Function(String?)? validator,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -79,15 +88,52 @@ class InputFormat {
             ),
           ),
         ),
-        TextField(
+        TextFormField(
           controller: controller,
           decoration: const InputDecoration(
             hintText: 'Enter your email',
             prefixIcon: Icon(Icons.email),
             border: OutlineInputBorder(),
+            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
           ),
           keyboardType: TextInputType.emailAddress,
           textInputAction: TextInputAction.next,
+          validator: validator,
+        ),
+      ],
+    );
+  }
+
+  static Widget phone({
+    required TextEditingController controller,
+    bool isRequired = false,
+    String? Function(String?)? validator,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8, left: 4),
+          child: Text(
+            'Phone Number ${isRequired ? '*' : ''}',
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Colors.black87,
+            ),
+          ),
+        ),
+        TextFormField(
+          controller: controller,
+          decoration: const InputDecoration(
+            hintText: 'Enter your phone number',
+            prefixIcon: Icon(Icons.phone),
+            border: OutlineInputBorder(),
+            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+          ),
+          keyboardType: TextInputType.phone,
+          textInputAction: TextInputAction.next,
+          validator: validator,
         ),
       ],
     );
@@ -96,6 +142,9 @@ class InputFormat {
   static Widget password({
     required TextEditingController controller,
     bool isRequired = false,
+    String? Function(String?)? validator,
+    bool obscureText = true,
+    VoidCallback? onToggleVisibility,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -111,16 +160,23 @@ class InputFormat {
             ),
           ),
         ),
-        TextField(
+        TextFormField(
           controller: controller,
-          obscureText: true,
-          decoration: const InputDecoration(
+          obscureText: obscureText,
+          decoration: InputDecoration(
             hintText: 'Enter your password',
-            prefixIcon: Icon(Icons.lock),
-            suffixIcon: Icon(Icons.visibility_off),
-            border: OutlineInputBorder(),
+            prefixIcon: const Icon(Icons.lock),
+            suffixIcon: IconButton(
+              icon: Icon(
+                obscureText ? Icons.visibility_off : Icons.visibility,
+              ),
+              onPressed: onToggleVisibility,
+            ),
+            border: const OutlineInputBorder(),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
           ),
           textInputAction: TextInputAction.next,
+          validator: validator,
         ),
       ],
     );
@@ -131,6 +187,9 @@ class InputFormat {
     required String originalPassword,
     String label = 'Confirm Password',
     bool isRequired = false,
+    String? Function(String?)? validator,
+    bool obscureText = true,
+    VoidCallback? onToggleVisibility,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -146,23 +205,23 @@ class InputFormat {
             ),
           ),
         ),
-        TextField(
+        TextFormField(
           controller: controller,
-          obscureText: true,
+          obscureText: obscureText,
           decoration: InputDecoration(
             hintText: 'Re-enter your password',
             prefixIcon: const Icon(Icons.lock),
-            suffixIcon: Icon(
-              controller.text.isNotEmpty && controller.text == originalPassword
-                  ? Icons.check_circle
-                  : Icons.error,
-              color: controller.text.isNotEmpty && controller.text == originalPassword
-                  ? Colors.green
-                  : Colors.red,
+            suffixIcon: IconButton(
+              icon: Icon(
+                obscureText ? Icons.visibility_off : Icons.visibility,
+              ),
+              onPressed: onToggleVisibility,
             ),
             border: const OutlineInputBorder(),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
           ),
           textInputAction: TextInputAction.done,
+          validator: validator,
         ),
       ],
     );

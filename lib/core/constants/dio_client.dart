@@ -2,18 +2,24 @@ import 'package:dio/dio.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trash2cash/core/constants/auth_interceptor.dart';
+import 'package:trash2cash/core/storage/token_refresh_service.dart';
 import 'api_constants.dart';
 import 'api_exceptions.dart';
 
 class DioClient {
   late Dio _dio;
   final SharedPreferences prefs;
+  late TokenRefreshService refreshService;
 
   DioClient(this.prefs) {
     _initializeDio();
   }
 
   void _initializeDio() {
+    // Create refresh service first
+    refreshService = TokenRefreshService();
+    
+    // Initialize Dio with base options
     _dio = Dio(
       BaseOptions(
         baseUrl: ApiConstants.baseUrl,
@@ -26,8 +32,14 @@ class DioClient {
       ),
     );
 
-    // Add auth interceptor
-    _dio.interceptors.add(AuthInterceptor(prefs: prefs));
+    // Set Dio instance in refresh service
+    refreshService.setDio(_dio);
+
+    // Add auth interceptor with refresh service
+    _dio.interceptors.add(AuthInterceptor(
+      prefs: prefs,
+      refreshService: refreshService,
+    ));
     
     // Add logging interceptor only in debug mode
     assert(() {
@@ -39,6 +51,7 @@ class DioClient {
           responseHeader: false,
           error: true,
           compact: true,
+          maxWidth: 100,
         ),
       );
       return true;
