@@ -136,24 +136,24 @@ class _Trash2CashHomeUIState extends State<Trash2CashHomeUI> {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(8),
+                        padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [Colors.green.shade400, Colors.green.shade700],
-                          ),
-                          borderRadius: BorderRadius.circular(12),
+                          color: Colors.white.withOpacity(0.2),
+                          shape: BoxShape.circle,
                         ),
-                        child: Image.asset(
-                          'assets/images/logo.png',
-                          height: 40,
-                          errorBuilder: (context, error, stackTrace) {
-                            return const Icon(Icons.recycling, color: Colors.white, size: 32);
-                          },
-                        ),
+                        child:Image.asset(
+                                'assets/images/logo.png',
+                                height: 60,
+                                width: 60,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return const Icon(Icons.recycling, color: Colors.green, size: 32);
+                                },
+                              ),
+
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        'Trash2Cash',
+                        'Tash',
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -239,23 +239,28 @@ class _Trash2CashHomeUIState extends State<Trash2CashHomeUI> {
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                   const SizedBox(height: 6),
+                                  // UPDATED ECO LEVEL CONTAINER WITH CODEFORCES COLORS
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                                     decoration: BoxDecoration(
-                                      color: Colors.green.shade100,
+                                      color: _getEcoLevelColor(ecoLevel),
                                       borderRadius: BorderRadius.circular(20),
                                     ),
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        const Icon(Icons.eco, size: 16, color: Colors.green),
+                                        Icon(
+                                          _getEcoLevelIcon(ecoLevel),
+                                          size: 16,
+                                          color: Colors.white,
+                                        ),
                                         const SizedBox(width: 5),
                                         Text(
                                           ecoLevel,
-                                          style: TextStyle(
+                                          style: const TextStyle(
                                             fontSize: 14,
                                             fontWeight: FontWeight.w600,
-                                            color: Colors.green.shade800,
+                                            color: Colors.white,
                                           ),
                                         ),
                                       ],
@@ -380,6 +385,40 @@ class _Trash2CashHomeUIState extends State<Trash2CashHomeUI> {
         },
       ),
     );
+  }
+
+  // Helper method to get eco level color - Codeforces style
+  Color _getEcoLevelColor(String ecoLevel) {
+    switch (ecoLevel) {
+      case "Master Eco":
+        return const Color(0xFF000000); // Black (Legendary Grandmaster)
+      case "Eco Warrior":
+        return const Color(0xFFFF0000); // Red (International Grandmaster)
+      case "Eco Enthusiast":
+        return const Color(0xFF0000FF); // Blue (Expert)
+      case "Eco Beginner":
+        return const Color(0xFF03A89E); // Cyan (Specialist)
+      case "Newbie":
+      default:
+        return Colors.grey.shade600; // Grey
+    }
+  }
+
+  // Helper method to get eco level icon
+  IconData _getEcoLevelIcon(String ecoLevel) {
+    switch (ecoLevel) {
+      case "Master Eco":
+        return Icons.whatshot; // Fire icon
+      case "Eco Warrior":
+        return Icons.local_fire_department; // Fire icon
+      case "Eco Enthusiast":
+        return Icons.auto_awesome; // Sparkle icon
+      case "Eco Beginner":
+        return Icons.eco; // Leaf icon
+      case "Newbie":
+      default:
+        return Icons.grass; // Grass icon
+    }
   }
 
   Widget _buildActivityItem(HistoryModel activity) {

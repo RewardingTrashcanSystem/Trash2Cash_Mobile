@@ -8,7 +8,7 @@ class AboutPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.green.shade50,
       appBar: AppBar(
-        title: const Text('About Trash2Cash'),
+        title: const Text('About Tash'),
         backgroundColor: Colors.green.shade700,
         centerTitle: true,
         elevation: 0,
@@ -83,11 +83,15 @@ class AboutPage extends StatelessWidget {
               color: Colors.white.withOpacity(0.2),
               shape: BoxShape.circle,
             ),
-            child: const Icon(
-              Icons.recycling,
-              size: 60,
-              color: Colors.white,
-            ),
+            child:Image.asset(
+                    'assets/images/logo.png',
+                    height: 60,
+                    width: 60,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Icon(Icons.recycling, color: Colors.green, size: 32);
+                    },
+                  ),
+
           ),
           const SizedBox(width: 20),
           Expanded(
@@ -95,7 +99,7 @@ class AboutPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Trash2Cash',
+                  'Tash',
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
@@ -419,7 +423,7 @@ class AboutPage extends StatelessWidget {
               _buildContactItem(
                 icon: Icons.email,
                 title: 'Email',
-                value: 'support@trash2cash.com',
+                value: 'support@tash.com',
               ),
               const SizedBox(height: 16),
               _buildContactItem(
@@ -508,7 +512,7 @@ class AboutPage extends StatelessWidget {
           const SizedBox(height: 15),
           _buildAppInfoRow('Version', '1.0.0'),
           _buildAppInfoRow('Last Updated', 'January 2026'),
-          _buildAppInfoRow('Developed By', 'Trash2Cash Team'),
+          _buildAppInfoRow('Developed By', 'Tash Team'),
           _buildAppInfoRow('Platform', 'Android & iOS'),
         ],
       ),

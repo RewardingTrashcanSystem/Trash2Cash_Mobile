@@ -13,7 +13,7 @@ class ApiException implements Exception {
   });
 
   @override
-  String toString() => 'ApiException: $message';
+  String toString() => message;
 
   factory ApiException.networkError(String message) {
     return ApiException(

@@ -5,7 +5,7 @@ import 'package:trash2cash/features/auth/presentation/screen/sign_up.dart';
 import 'package:trash2cash/features/onboarding/widget/app_button.dart';
 import 'package:trash2cash/features/auth/presentation/provider/auth_provider.dart';
 import 'package:trash2cash/features/home/presentation/screen/home_screen.dart';
-// import 'package:trash2cash/features/profile/presentation/provider/profile_provider.dart';
+
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});

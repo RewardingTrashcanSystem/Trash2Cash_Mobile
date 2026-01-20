@@ -71,8 +71,8 @@ static String getImageFullUrl(String relativePath) {
   static const String recentHistory = '/api/points/recent/';
 
   // Timeouts
-  static const Duration connectionTimeout = Duration(seconds: 60);
-  static const Duration receiveTimeout = Duration(seconds: 60);
+  static const Duration connectionTimeout = Duration(seconds: 30);
+  static const Duration receiveTimeout = Duration(seconds: 30);
 
   // Storage Keys
   static const String tokenKey = 'auth_token';

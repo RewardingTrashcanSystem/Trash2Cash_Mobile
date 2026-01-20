@@ -88,7 +88,7 @@ class _SplashScreenState extends State<SplashScreen> {
               
               // App Name
               Text(
-                'Trash2Cash',
+                'Tash',
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,

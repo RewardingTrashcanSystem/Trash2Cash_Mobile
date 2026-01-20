@@ -76,7 +76,7 @@ class OnbordingPage extends StatelessWidget {
                     ).createShader(bounds);
                   },
                   child: Text(
-                    "Trash2Cash",
+                    "Tash",
                     style: TextStyle(
                       fontFamily: 'Afacad',
                       fontSize: 56,
@@ -91,7 +91,7 @@ class OnbordingPage extends StatelessWidget {
                 
                 // Tagline
                 Text(
-                  "Toss Trash, Earn Cash",
+                  "Trash to Cash",
                   style: TextStyle(
                     fontFamily: 'Afacad',
                     fontSize: 22,
